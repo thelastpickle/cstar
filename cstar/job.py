@@ -255,7 +255,9 @@ class Job(object):
         """Wait until node returns"""
         while True:
             try:
-                self.update_current_topology(nodes)
+                if self.state.has_pending():
+                    # only update topology if we still have some jobs to start
+                    self.update_current_topology(nodes)
 
                 if self.state.is_healthy():
                     break
@@ -336,7 +338,7 @@ class Job(object):
                 host, result = self.results.get(timeout=self.timeout)
                 self.returned_jobs.append((host, result))
             self.handle_finished_jobs(self.returned_jobs)
-            
+
             self.wait_for_node_to_return(returned_job[0] for returned_job in self.returned_jobs)
             self.returned_jobs = list()
 
