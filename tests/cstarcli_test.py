@@ -19,18 +19,56 @@ import unittest
 import cstar.args
 import cstar.cstarcli
 
-
+# noop stub
 def execute_command(args):
     return
 
+# noop stub
 def execute_continue(args):
     return
 
+# noop stub
 def execute_cleanup(args):
     return
 
 class CstarcliTest(unittest.TestCase):
+    
+    DEFAULT_RUN_NAMESPACE_VALUES = {
+        'COMMAND': 'echo',
+        'cluster_parallel': None,
+        'dc_filter': None,
+        'dc_parallel': None,
+        'enforced_job_id': None,
+        'host': None,
+        'host_file': None,
+        'ignore_down_nodes': False,
+        'jmx_username': None,
+        'key_space': None,
+        'max_concurrency': None,
+        'node_done_pause_time': 0.0,
+        'output_directory': None,
+        'seed_host': None,
+        'ssh_identity_file': None,
+        'ssh_lib': 'paramiko',
+        'ssh_password': None,
+        'ssh_pause_time': 0.5,
+        'ssh_username': None,
+        'stop_after': None,
+        'strategy': None,
+        'strategy_all_per_dc': False,
+        'strategy_one': False,
+        'strategy_one_per_dc': False,
+        'strategy_topology': False,
+        'strategy_topology_per_dc': False,
+        'sub_command': 'run',
+        'timeout': None,
+        'verbose': 0
+    }
 
+    def assert_args(self, args, expected):
+        for k in expected:
+            self.assertEqual(getattr(args, k), expected[k], f"{k} does not have expected value")
+            
     def test_empty(self):
 
         parser = argparse.ArgumentParser(prog='cstar', formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -61,38 +99,10 @@ class CstarcliTest(unittest.TestCase):
 
         parser = argparse.ArgumentParser(prog='cstar', formatter_class=argparse.RawDescriptionHelpFormatter)
         cstar.args.add_cstar_arguments(parser, cstar.cstarcli.get_commands(), execute_command, execute_continue, execute_cleanup)
-        namespace = parser.parse_args(["run", "--command", "echo"])
+        args = parser.parse_args(["run", "--command", "echo"])
 
-        self.assertEqual(namespace.COMMAND, 'echo')
-        self.assertEqual(namespace.command.strategy, 'topology')
-        self.assertEqual(namespace.cluster_parallel, None)
-        self.assertEqual(namespace.dc_filter, None)
-        self.assertEqual(namespace.dc_parallel, None)
-        self.assertEqual(namespace.enforced_job_id, None)
-        self.assertEqual(namespace.host, None)
-        self.assertEqual(namespace.host_file, None)
-        self.assertEqual(namespace.ignore_down_nodes, False)
-        self.assertEqual(namespace.jmx_username, None)
-        self.assertEqual(namespace.key_space, None)
-        self.assertEqual(namespace.max_concurrency, None)
-        self.assertEqual(namespace.node_done_pause_time, 0.0)
-        self.assertEqual(namespace.output_directory, None)
-        self.assertEqual(namespace.seed_host, None)
-        self.assertEqual(namespace.ssh_identity_file, None)
-        self.assertEqual(namespace.ssh_lib, 'paramiko')
-        self.assertEqual(namespace.ssh_password, None)
-        self.assertEqual(namespace.ssh_pause_time, 0.5)
-        self.assertEqual(namespace.ssh_username, None)
-        self.assertEqual(namespace.stop_after, None)
-        self.assertEqual(namespace.strategy, None)
-        self.assertEqual(namespace.strategy_all_per_dc, False)
-        self.assertEqual(namespace.strategy_one, False)
-        self.assertEqual(namespace.strategy_one_per_dc, False)
-        self.assertEqual(namespace.strategy_topology, False)
-        self.assertEqual(namespace.strategy_topology_per_dc, False)
-        self.assertEqual(namespace.sub_command, 'run')
-        self.assertEqual(namespace.timeout, None)
-        self.assertEqual(namespace.verbose, 0)
+        self.assert_args(args, self.DEFAULT_RUN_NAMESPACE_VALUES)
+        self.assertEqual(args.command.strategy, 'topology')
 
     def test_run_strategy_one(self):
 
@@ -101,67 +111,15 @@ class CstarcliTest(unittest.TestCase):
         args = parser.parse_args(["run", "--command", "echo", "--strategy=one"])
 
         #print(args)
-        self.assertEqual(args.COMMAND, 'echo')
-        self.assertEqual(args.cluster_parallel, None)
-        self.assertEqual(args.dc_filter, None)
-        self.assertEqual(args.dc_parallel, None)
-        self.assertEqual(args.enforced_job_id, None)
-        self.assertEqual(args.host, None)
-        self.assertEqual(args.host_file, None)
-        self.assertEqual(args.ignore_down_nodes, False)
-        self.assertEqual(args.jmx_username, None)
-        self.assertEqual(args.key_space, None)
-        self.assertEqual(args.max_concurrency, None)
-        self.assertEqual(args.node_done_pause_time, 0.0)
-        self.assertEqual(args.output_directory, None)
-        self.assertEqual(args.seed_host, None)
-        self.assertEqual(args.ssh_identity_file, None)
-        self.assertEqual(args.ssh_lib, 'paramiko')
-        self.assertEqual(args.ssh_password, None)
-        self.assertEqual(args.ssh_pause_time, 0.5)
-        self.assertEqual(args.ssh_username, None)
-        self.assertEqual(args.stop_after, None)
-        self.assertEqual(args.strategy, 'one')
-        self.assertEqual(args.strategy_all_per_dc, False)
-        self.assertEqual(args.strategy_one, False)
-        self.assertEqual(args.strategy_one_per_dc, False)
-        self.assertEqual(args.strategy_topology, False)
-        self.assertEqual(args.strategy_topology_per_dc, False)
-        self.assertEqual(args.sub_command, 'run')
-        self.assertEqual(args.timeout, None)
-        self.assertEqual(args.verbose, 0)
+        expected = self.DEFAULT_RUN_NAMESPACE_VALUES.copy()
+        expected.update({'strategy': 'one'})
+        self.assert_args(args, expected)
+        self.assertEqual(args.command.strategy, 'topology')
 
         computed_args = cstar.cstarcli.args_from_strategy_shortcut(copy.deepcopy(args))
 
-        self.assertEqual(computed_args.COMMAND, 'echo')
-        self.assertEqual(computed_args.cluster_parallel, None)
-        self.assertEqual(computed_args.dc_filter, None)
-        self.assertEqual(computed_args.dc_parallel, None)
-        self.assertEqual(computed_args.enforced_job_id, None)
-        self.assertEqual(computed_args.host, None)
-        self.assertEqual(computed_args.host_file, None)
-        self.assertEqual(computed_args.ignore_down_nodes, False)
-        self.assertEqual(computed_args.jmx_username, None)
-        self.assertEqual(computed_args.key_space, None)
-        self.assertEqual(computed_args.max_concurrency, None)
-        self.assertEqual(computed_args.node_done_pause_time, 0.0)
-        self.assertEqual(computed_args.output_directory, None)
-        self.assertEqual(computed_args.seed_host, None)
-        self.assertEqual(computed_args.ssh_identity_file, None)
-        self.assertEqual(computed_args.ssh_lib, 'paramiko')
-        self.assertEqual(computed_args.ssh_password, None)
-        self.assertEqual(computed_args.ssh_pause_time, 0.5)
-        self.assertEqual(computed_args.ssh_username, None)
-        self.assertEqual(computed_args.stop_after, None)
-        self.assertEqual(computed_args.strategy, 'one')
-        self.assertEqual(computed_args.strategy_all_per_dc, False)
-        self.assertEqual(computed_args.strategy_one, False)
-        self.assertEqual(computed_args.strategy_one_per_dc, False)
-        self.assertEqual(computed_args.strategy_topology, False)
-        self.assertEqual(computed_args.strategy_topology_per_dc, False)
-        self.assertEqual(computed_args.sub_command, 'run')
-        self.assertEqual(computed_args.timeout, None)
-        self.assertEqual(computed_args.verbose, 0)
+        #print(computed_args)
+        self.assert_args(computed_args, expected)
 
         self.assertEqual(
             cstar.strategy.parse(cstar.cstarcli.fallback(computed_args.strategy, args.strategy, "funk")),
@@ -175,68 +133,16 @@ class CstarcliTest(unittest.TestCase):
         args = parser.parse_args(["run", "--command", "echo", "--one"])
 
         #print(args)
-        self.assertEqual(args.COMMAND, 'echo')
-        self.assertEqual(args.cluster_parallel, None)
-        self.assertEqual(args.dc_filter, None)
-        self.assertEqual(args.dc_parallel, None)
-        self.assertEqual(args.enforced_job_id, None)
-        self.assertEqual(args.host, None)
-        self.assertEqual(args.host_file, None)
-        self.assertEqual(args.ignore_down_nodes, False)
-        self.assertEqual(args.jmx_username, None)
-        self.assertEqual(args.key_space, None)
-        self.assertEqual(args.max_concurrency, None)
-        self.assertEqual(args.node_done_pause_time, 0.0)
-        self.assertEqual(args.output_directory, None)
-        self.assertEqual(args.seed_host, None)
-        self.assertEqual(args.ssh_identity_file, None)
-        self.assertEqual(args.ssh_lib, 'paramiko')
-        self.assertEqual(args.ssh_password, None)
-        self.assertEqual(args.ssh_pause_time, 0.5)
-        self.assertEqual(args.ssh_username, None)
-        self.assertEqual(args.stop_after, None)
-        self.assertEqual(args.strategy, None)
-        self.assertEqual(args.strategy_all_per_dc, False)
-        self.assertEqual(args.strategy_one, True)
-        self.assertEqual(args.strategy_one_per_dc, False)
-        self.assertEqual(args.strategy_topology, False)
-        self.assertEqual(args.strategy_topology_per_dc, False)
-        self.assertEqual(args.sub_command, 'run')
-        self.assertEqual(args.timeout, None)
-        self.assertEqual(args.verbose, 0)
+        expected = self.DEFAULT_RUN_NAMESPACE_VALUES.copy()
+        expected.update({'strategy_one': True})
+        self.assert_args(args, expected)
+        self.assertEqual(args.command.strategy, 'topology')
 
         computed_args = cstar.cstarcli.args_from_strategy_shortcut(copy.deepcopy(args))
 
         #print(computed_args)
-        self.assertEqual(computed_args.COMMAND, 'echo')
-        self.assertEqual(computed_args.cluster_parallel, None)
-        self.assertEqual(computed_args.dc_filter, None)
-        self.assertEqual(computed_args.dc_parallel, False)
-        self.assertEqual(computed_args.enforced_job_id, None)
-        self.assertEqual(computed_args.host, None)
-        self.assertEqual(computed_args.host_file, None)
-        self.assertEqual(computed_args.ignore_down_nodes, False)
-        self.assertEqual(computed_args.jmx_username, None)
-        self.assertEqual(computed_args.key_space, None)
-        self.assertEqual(computed_args.max_concurrency, None)
-        self.assertEqual(computed_args.node_done_pause_time, 0.0)
-        self.assertEqual(computed_args.output_directory, None)
-        self.assertEqual(computed_args.seed_host, None)
-        self.assertEqual(computed_args.ssh_identity_file, None)
-        self.assertEqual(computed_args.ssh_lib, 'paramiko')
-        self.assertEqual(computed_args.ssh_password, None)
-        self.assertEqual(computed_args.ssh_pause_time, 0.5)
-        self.assertEqual(computed_args.ssh_username, None)
-        self.assertEqual(computed_args.stop_after, None)
-        self.assertEqual(computed_args.strategy, 'one')
-        self.assertEqual(computed_args.strategy_all_per_dc, False)
-        self.assertEqual(computed_args.strategy_one, True)
-        self.assertEqual(computed_args.strategy_one_per_dc, False)
-        self.assertEqual(computed_args.strategy_topology, False)
-        self.assertEqual(computed_args.strategy_topology_per_dc, False)
-        self.assertEqual(computed_args.sub_command, 'run')
-        self.assertEqual(computed_args.timeout, None)
-        self.assertEqual(computed_args.verbose, 0)
+        expected.update({'dc_parallel': False, 'strategy': 'one'})
+        self.assert_args(computed_args, expected)
 
         self.assertEqual(
             cstar.strategy.parse(cstar.cstarcli.fallback(computed_args.strategy, args.strategy, "funk")),
@@ -250,67 +156,15 @@ class CstarcliTest(unittest.TestCase):
         args = parser.parse_args(["run", "--command", "echo", "--strategy=one", "--dc-parallel"])
 
         #print(args)
-        self.assertEqual(args.COMMAND, 'echo')
-        self.assertEqual(args.cluster_parallel, None)
-        self.assertEqual(args.dc_filter, None)
-        self.assertEqual(args.dc_parallel, True)
-        self.assertEqual(args.enforced_job_id, None)
-        self.assertEqual(args.host, None)
-        self.assertEqual(args.host_file, None)
-        self.assertEqual(args.ignore_down_nodes, False)
-        self.assertEqual(args.jmx_username, None)
-        self.assertEqual(args.key_space, None)
-        self.assertEqual(args.max_concurrency, None)
-        self.assertEqual(args.node_done_pause_time, 0.0)
-        self.assertEqual(args.output_directory, None)
-        self.assertEqual(args.seed_host, None)
-        self.assertEqual(args.ssh_identity_file, None)
-        self.assertEqual(args.ssh_lib, 'paramiko')
-        self.assertEqual(args.ssh_password, None)
-        self.assertEqual(args.ssh_pause_time, 0.5)
-        self.assertEqual(args.ssh_username, None)
-        self.assertEqual(args.stop_after, None)
-        self.assertEqual(args.strategy, 'one')
-        self.assertEqual(args.strategy_all_per_dc, False)
-        self.assertEqual(args.strategy_one, False)
-        self.assertEqual(args.strategy_one_per_dc, False)
-        self.assertEqual(args.strategy_topology, False)
-        self.assertEqual(args.strategy_topology_per_dc, False)
-        self.assertEqual(args.sub_command, 'run')
-        self.assertEqual(args.timeout, None)
-        self.assertEqual(args.verbose, 0)
+        expected = self.DEFAULT_RUN_NAMESPACE_VALUES.copy()
+        expected.update({'dc_parallel': True, 'strategy': 'one'})
+        self.assert_args(args, expected)
+        self.assertEqual(args.command.strategy, 'topology')
 
         computed_args = cstar.cstarcli.args_from_strategy_shortcut(copy.deepcopy(args))
 
-        self.assertEqual(computed_args.COMMAND, 'echo')
-        self.assertEqual(computed_args.cluster_parallel, None)
-        self.assertEqual(computed_args.dc_filter, None)
-        self.assertEqual(computed_args.dc_parallel, True)
-        self.assertEqual(computed_args.enforced_job_id, None)
-        self.assertEqual(computed_args.host, None)
-        self.assertEqual(computed_args.host_file, None)
-        self.assertEqual(computed_args.ignore_down_nodes, False)
-        self.assertEqual(computed_args.jmx_username, None)
-        self.assertEqual(computed_args.key_space, None)
-        self.assertEqual(computed_args.max_concurrency, None)
-        self.assertEqual(computed_args.node_done_pause_time, 0.0)
-        self.assertEqual(computed_args.output_directory, None)
-        self.assertEqual(computed_args.seed_host, None)
-        self.assertEqual(computed_args.ssh_identity_file, None)
-        self.assertEqual(computed_args.ssh_lib, 'paramiko')
-        self.assertEqual(computed_args.ssh_password, None)
-        self.assertEqual(computed_args.ssh_pause_time, 0.5)
-        self.assertEqual(computed_args.ssh_username, None)
-        self.assertEqual(computed_args.stop_after, None)
-        self.assertEqual(computed_args.strategy, 'one')
-        self.assertEqual(computed_args.strategy_all_per_dc, False)
-        self.assertEqual(computed_args.strategy_one, False)
-        self.assertEqual(computed_args.strategy_one_per_dc, False)
-        self.assertEqual(computed_args.strategy_topology, False)
-        self.assertEqual(computed_args.strategy_topology_per_dc, False)
-        self.assertEqual(computed_args.sub_command, 'run')
-        self.assertEqual(computed_args.timeout, None)
-        self.assertEqual(computed_args.verbose, 0)
+        #print(computed_args)
+        self.assert_args(computed_args, expected)
 
         self.assertEqual(
             cstar.strategy.parse(cstar.cstarcli.fallback(computed_args.strategy, args.strategy, "funk")),
@@ -324,72 +178,199 @@ class CstarcliTest(unittest.TestCase):
         args = parser.parse_args(["run", "--command", "echo", "--one-per-dc"])
 
         #print(args)
-        self.assertEqual(args.COMMAND, 'echo')
-        self.assertEqual(args.cluster_parallel, None)
-        self.assertEqual(args.dc_filter, None)
-        self.assertEqual(args.dc_parallel, None)
-        self.assertEqual(args.enforced_job_id, None)
-        self.assertEqual(args.host, None)
-        self.assertEqual(args.host_file, None)
-        self.assertEqual(args.ignore_down_nodes, False)
-        self.assertEqual(args.jmx_username, None)
-        self.assertEqual(args.key_space, None)
-        self.assertEqual(args.max_concurrency, None)
-        self.assertEqual(args.node_done_pause_time, 0.0)
-        self.assertEqual(args.output_directory, None)
-        self.assertEqual(args.seed_host, None)
-        self.assertEqual(args.ssh_identity_file, None)
-        self.assertEqual(args.ssh_lib, 'paramiko')
-        self.assertEqual(args.ssh_password, None)
-        self.assertEqual(args.ssh_pause_time, 0.5)
-        self.assertEqual(args.ssh_username, None)
-        self.assertEqual(args.stop_after, None)
-        self.assertEqual(args.strategy, None)
-        self.assertEqual(args.strategy_all_per_dc, False)
-        self.assertEqual(args.strategy_one, False)
-        self.assertEqual(args.strategy_one_per_dc, True)
-        self.assertEqual(args.strategy_topology, False)
-        self.assertEqual(args.strategy_topology_per_dc, False)
-        self.assertEqual(args.sub_command, 'run')
-        self.assertEqual(args.timeout, None)
-        self.assertEqual(args.verbose, 0)
+        expected = self.DEFAULT_RUN_NAMESPACE_VALUES.copy()
+        expected.update({'strategy_one_per_dc': True})
+        self.assert_args(args, expected)
+        self.assertEqual(args.command.strategy, 'topology')
 
         computed_args = cstar.cstarcli.args_from_strategy_shortcut(copy.deepcopy(args))
-
-        self.assertEqual(computed_args.COMMAND, 'echo')
-        self.assertEqual(computed_args.cluster_parallel, None)
-        self.assertEqual(computed_args.dc_filter, None)
-        self.assertEqual(computed_args.dc_parallel, True)
-        self.assertEqual(computed_args.enforced_job_id, None)
-        self.assertEqual(computed_args.host, None)
-        self.assertEqual(computed_args.host_file, None)
-        self.assertEqual(computed_args.ignore_down_nodes, False)
-        self.assertEqual(computed_args.jmx_username, None)
-        self.assertEqual(computed_args.key_space, None)
-        self.assertEqual(computed_args.max_concurrency, None)
-        self.assertEqual(computed_args.node_done_pause_time, 0.0)
-        self.assertEqual(computed_args.output_directory, None)
-        self.assertEqual(computed_args.seed_host, None)
-        self.assertEqual(computed_args.ssh_identity_file, None)
-        self.assertEqual(computed_args.ssh_lib, 'paramiko')
-        self.assertEqual(computed_args.ssh_password, None)
-        self.assertEqual(computed_args.ssh_pause_time, 0.5)
-        self.assertEqual(computed_args.ssh_username, None)
-        self.assertEqual(computed_args.stop_after, None)
-        self.assertEqual(computed_args.strategy, 'one')
-        self.assertEqual(computed_args.strategy_all_per_dc, False)
-        self.assertEqual(computed_args.strategy_one, False)
-        self.assertEqual(computed_args.strategy_one_per_dc, True)
-        self.assertEqual(computed_args.strategy_topology, False)
-        self.assertEqual(computed_args.strategy_topology_per_dc, False)
-        self.assertEqual(computed_args.sub_command, 'run')
-        self.assertEqual(computed_args.timeout, None)
-        self.assertEqual(computed_args.verbose, 0)
+        
+        #print(computed_args)
+        expected.update({'dc_parallel': True, 'strategy': 'one'})
+        self.assert_args(computed_args, expected)
 
         self.assertEqual(
             cstar.strategy.parse(cstar.cstarcli.fallback(computed_args.strategy, args.strategy, "funk")),
             cstar.strategy.Strategy.ONE)
 
+
+    def test_run_strategy_topology(self):
+
+        parser = argparse.ArgumentParser(prog='cstar', formatter_class=argparse.RawDescriptionHelpFormatter)
+        cstar.args.add_cstar_arguments(parser, cstar.cstarcli.get_commands(), execute_command, execute_continue, execute_cleanup)
+        args = parser.parse_args(["run", "--command", "echo", "--strategy=topology"])
+
+        #print(args)
+        expected = self.DEFAULT_RUN_NAMESPACE_VALUES.copy()
+        expected.update({'strategy': 'topology'})
+        self.assert_args(args, expected)
+        self.assertEqual(args.command.strategy, 'topology')
+
+        computed_args = cstar.cstarcli.args_from_strategy_shortcut(copy.deepcopy(args))
+
+        #print(computed_args)
+        self.assert_args(computed_args, expected)
+
+        self.assertEqual(
+            cstar.strategy.parse(cstar.cstarcli.fallback(computed_args.strategy, args.strategy, "funk")),
+            cstar.strategy.Strategy.TOPOLOGY)
+
+
+    def test_run_strategy_topology__short(self):
+
+        parser = argparse.ArgumentParser(prog='cstar', formatter_class=argparse.RawDescriptionHelpFormatter)
+        cstar.args.add_cstar_arguments(parser, cstar.cstarcli.get_commands(), execute_command, execute_continue, execute_cleanup)
+        args = parser.parse_args(["run", "--command", "echo", "--topology"])
+
+        #print(args)
+        expected = self.DEFAULT_RUN_NAMESPACE_VALUES.copy()
+        expected.update({'strategy_topology': True})
+        self.assert_args(args, expected)
+        self.assertEqual(args.command.strategy, 'topology')
+
+        computed_args = cstar.cstarcli.args_from_strategy_shortcut(copy.deepcopy(args))
+
+        #print(computed_args)
+        expected.update({'dc_parallel': False, 'strategy': 'topology'})
+        self.assert_args(computed_args, expected)
+
+        self.assertEqual(
+            cstar.strategy.parse(cstar.cstarcli.fallback(computed_args.strategy, args.strategy, "funk")),
+            cstar.strategy.Strategy.TOPOLOGY)
+
+
+    def test_run_stratgy_topology_per_dc(self):
+
+        parser = argparse.ArgumentParser(prog='cstar', formatter_class=argparse.RawDescriptionHelpFormatter)
+        cstar.args.add_cstar_arguments(parser, cstar.cstarcli.get_commands(), execute_command, execute_continue, execute_cleanup)
+        args = parser.parse_args(["run", "--command", "echo", "--strategy=topology", "--dc-parallel"])
+
+        #print(args)
+        expected = self.DEFAULT_RUN_NAMESPACE_VALUES.copy()
+        expected.update({'dc_parallel': True, 'strategy': 'topology'})
+        self.assert_args(args, expected)
+        self.assertEqual(args.command.strategy, 'topology')
+
+        computed_args = cstar.cstarcli.args_from_strategy_shortcut(copy.deepcopy(args))
+
+        #print(computed_args)
+        self.assert_args(computed_args, expected)
+
+        self.assertEqual(
+            cstar.strategy.parse(cstar.cstarcli.fallback(computed_args.strategy, args.strategy, "funk")),
+            cstar.strategy.Strategy.TOPOLOGY)
+
+
+    def test_run_stratgy_topology_per_dc__short(self):
+
+        parser = argparse.ArgumentParser(prog='cstar', formatter_class=argparse.RawDescriptionHelpFormatter)
+        cstar.args.add_cstar_arguments(parser, cstar.cstarcli.get_commands(), execute_command, execute_continue, execute_cleanup)
+        args = parser.parse_args(["run", "--command", "echo", "--topology-per-dc"])
+
+        #print(args)
+        expected = self.DEFAULT_RUN_NAMESPACE_VALUES.copy()
+        expected.update({'strategy_topology_per_dc': True})
+        self.assert_args(args, expected)
+        self.assertEqual(args.command.strategy, 'topology')
+
+        computed_args = cstar.cstarcli.args_from_strategy_shortcut(copy.deepcopy(args))
+
+        #print(computed_args)
+        expected.update({'dc_parallel': True, 'strategy': 'topology'})
+        self.assert_args(computed_args, expected)
+
+        self.assertEqual(
+            cstar.strategy.parse(cstar.cstarcli.fallback(computed_args.strategy, args.strategy, "funk")),
+            cstar.strategy.Strategy.TOPOLOGY)
+
+    def test_run_strategy_all(self):
+
+        parser = argparse.ArgumentParser(prog='cstar', formatter_class=argparse.RawDescriptionHelpFormatter)
+        cstar.args.add_cstar_arguments(parser, cstar.cstarcli.get_commands(), execute_command, execute_continue, execute_cleanup)
+        args = parser.parse_args(["run", "--command", "echo", "--strategy=all"])
+
+        #print(args)
+        expected = self.DEFAULT_RUN_NAMESPACE_VALUES.copy()
+        expected.update({'strategy': 'all'})
+        self.assert_args(args, expected)
+        self.assertEqual(args.command.strategy, 'topology')
+
+        computed_args = cstar.cstarcli.args_from_strategy_shortcut(copy.deepcopy(args))
+
+        #print(computed_args)
+        self.assert_args(computed_args, expected)
+
+        self.assertEqual(
+            cstar.strategy.parse(cstar.cstarcli.fallback(computed_args.strategy, args.strategy, "funk")),
+            cstar.strategy.Strategy.ALL)
+
+
+    def test_run_strategy_all__short(self):
+
+        parser = argparse.ArgumentParser(prog='cstar', formatter_class=argparse.RawDescriptionHelpFormatter)
+        cstar.args.add_cstar_arguments(parser, cstar.cstarcli.get_commands(), execute_command, execute_continue, execute_cleanup)
+        args = parser.parse_args(["run", "--command", "echo", "--all"])
+
+        #print(args)
+        expected = self.DEFAULT_RUN_NAMESPACE_VALUES.copy()
+        expected.update({'strategy_all': True})
+        self.assert_args(args, expected)
+        self.assertEqual(args.command.strategy, 'topology')
+
+        computed_args = cstar.cstarcli.args_from_strategy_shortcut(copy.deepcopy(args))
+
+        #print(computed_args)
+        expected.update({'dc_parallel': False, 'strategy': 'all'})
+        self.assert_args(computed_args, expected)
+
+        self.assertEqual(
+            cstar.strategy.parse(cstar.cstarcli.fallback(computed_args.strategy, args.strategy, "funk")),
+            cstar.strategy.Strategy.ALL)
+
+
+    def test_run_stratgy_all_per_dc(self):
+
+        parser = argparse.ArgumentParser(prog='cstar', formatter_class=argparse.RawDescriptionHelpFormatter)
+        cstar.args.add_cstar_arguments(parser, cstar.cstarcli.get_commands(), execute_command, execute_continue, execute_cleanup)
+        args = parser.parse_args(["run", "--command", "echo", "--strategy=all", "--dc-parallel"])
+
+        #print(args)
+        expected = self.DEFAULT_RUN_NAMESPACE_VALUES.copy()
+        expected.update({'dc_parallel': True, 'strategy': 'all'})
+        self.assert_args(args, expected)
+        self.assertEqual(args.command.strategy, 'topology')
+
+        computed_args = cstar.cstarcli.args_from_strategy_shortcut(copy.deepcopy(args))
+
+        #print(computed_args)
+        self.assert_args(computed_args, expected)
+
+        self.assertEqual(
+            cstar.strategy.parse(cstar.cstarcli.fallback(computed_args.strategy, args.strategy, "funk")),
+            cstar.strategy.Strategy.ALL)
+
+
+    def test_run_stratgy_all_per_dc__short(self):
+
+        parser = argparse.ArgumentParser(prog='cstar', formatter_class=argparse.RawDescriptionHelpFormatter)
+        cstar.args.add_cstar_arguments(parser, cstar.cstarcli.get_commands(), execute_command, execute_continue, execute_cleanup)
+        args = parser.parse_args(["run", "--command", "echo", "--all-per-dc"])
+
+        #print(args)
+        expected = self.DEFAULT_RUN_NAMESPACE_VALUES.copy()
+        expected.update({'strategy_all_per_dc': True})
+        self.assert_args(args, expected)
+        self.assertEqual(args.command.strategy, 'topology')
+
+        computed_args = cstar.cstarcli.args_from_strategy_shortcut(copy.deepcopy(args))
+
+        #print(computed_args)
+        expected.update({'dc_parallel': True, 'strategy': 'all'})
+        self.assert_args(computed_args, expected)
+
+        self.assertEqual(
+            cstar.strategy.parse(cstar.cstarcli.fallback(computed_args.strategy, args.strategy, "funk")),
+            cstar.strategy.Strategy.ALL)
 
 
     def test_continue(self):
